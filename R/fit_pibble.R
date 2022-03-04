@@ -227,6 +227,7 @@ pibble <- function(Y=NULL, X=NULL, upsilon=NULL, Theta=NULL, Gamma=NULL, Xi=NULL
     out[["Sigma"]] <- fitu$Sigma
   }
   
+  
   # By default just returns all other parameters
   out$N <- N
   out$Q <- Q
