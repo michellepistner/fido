@@ -15,6 +15,7 @@ pibble(
   Xi = NULL,
   init = NULL,
   pars = c("Eta", "Lambda", "Sigma"),
+  isPIM = FALSE,
   ...
 )
 
@@ -35,13 +36,13 @@ be present to sample Eta)}
 \item{Gamma}{QxQ prior covariance matrix
 (default: diag(Q))}
 
-\item{Xi}{(D-1)x(D-1) prior covariance matrix
-(default: ALR transform of diag(1)*(upsilon-D)/2 - this is
-essentially iid on "base scale" using Aitchison terminology)}
+\item{Xi}{(D)x(D) prior covariance matrix for the log abundances}
 
 \item{init}{(D-1) x Q initialization for Eta for optimization}
 
 \item{pars}{character vector of posterior parameters to return}
+
+\item{isPIM}{Boolean. If true, the Bayesian PIM version of fido is fit}
 
 \item{...}{arguments passed to \code{\link{optimPibbleCollapsed}} and
 \code{\link{uncollapsePibble}}}

@@ -18,12 +18,11 @@
 #'   (default: matrix(0, D-1, Q))
 #' @param Gamma QxQ prior covariance matrix 
 #'   (default: diag(Q))
-#' @param Xi (D-1)x(D-1) prior covariance matrix
-#'   (default: ALR transform of diag(1)*(upsilon-D)/2 - this is 
-#'   essentially iid on "base scale" using Aitchison terminology)
+#' @param Xi (D)x(D) prior covariance matrix for the log abundances
 #' @param init (D-1) x Q initialization for Eta for optimization
 #' @param pars character vector of posterior parameters to return
 #' @param m object of class pibblefit 
+#' @param isPIM Boolean. If true, the Bayesian PIM version of fido is fit
 #' @param ... arguments passed to \code{\link{optimPibbleCollapsed}} and 
 #'   \code{\link{uncollapsePibble}}
 #' 
@@ -72,10 +71,11 @@ NULL
 pibble <- function(Y=NULL, X=NULL, upsilon=NULL, Theta=NULL, Gamma=NULL, Xi=NULL,
                     init=NULL, 
                     pars=c("Eta", "Lambda", "Sigma"),
+                    isPIM = FALSE,
                     ...){
   args <- list(...)
   N <- try_set_dims(c(ncol(Y), ncol(X), args[["N"]]))
-  D <- try_set_dims(c(nrow(Y), nrow(Theta)+1, nrow(Xi)+1, ncol(Xi)+1, args[["D"]]))
+  D <- try_set_dims(c(nrow(Y), nrow(Theta)+1, nrow(Xi), ncol(Xi), args[["D"]]))
   Q <- try_set_dims(c(nrow(X), ncol(Theta), nrow(Gamma), ncol(Gamma), args[["Q"]]))
   if (any(c(N, D, Q) <=0)) stop("N, D, and Q must all be greater than 0 (D must be greater than 1)")
   if (D <= 1) stop("D must be greater than 1")
@@ -89,10 +89,11 @@ pibble <- function(Y=NULL, X=NULL, upsilon=NULL, Theta=NULL, Gamma=NULL, Xi=NULL
   if (is.null(Xi)) {
     # default is iid on base scale
     # G <- cbind(diag(D-1), -1) ## alr log-constrast matrix
+    Xi <- 0.5 *diag(D)
     # Xi <- 0.5*G%*%diag(D)%*%t(G) ## default is iid on base scale
-    Xi <- matrix(0.5, D-1, D-1) # same as commented out above 2 lines
-    diag(Xi) <- 1               # same as commented out above 2 lines
-    Xi <- Xi*(upsilon-D) # make inverse wishart mean Xi as in previous lines 
+    #Xi <- matrix(0.5, D-1, D-1) # same as commented out above 2 lines
+    #diag(Xi) <- 1               # same as commented out above 2 lines
+    #Xi <- Xi*(upsilon-D) # make inverse wishart mean Xi as in previous lines 
   }
   
   # check dimensions
@@ -145,12 +146,13 @@ pibble <- function(Y=NULL, X=NULL, upsilon=NULL, Theta=NULL, Gamma=NULL, Xi=NULL
   ncores <- args_null("ncores", args, -1)
   seed <- args_null("seed", args, sample(1:2^15, 1))
   
-
+  G <- cbind(diag(D-1), -1)
+  Xi.ALR = G%*%Xi%*%t(G)
   ## precomputation ## 
   #KInv <- solve(Xi)
   #AInv <- solve(diag(N) + t(X) %*% Gamma %*% X)
   if (verbose) cat("Inverting Priors\n")
-  KInv <- chol2inv(chol(Xi))
+  KInv <- chol2inv(chol(Xi.ALR))
   AInv <- chol2inv(chol(diag(N) + t(X) %*% Gamma %*% X))
   if (verbose) cat("Starting Optimization\n")
   ## fit collapsed model ##
@@ -183,10 +185,21 @@ pibble <- function(Y=NULL, X=NULL, upsilon=NULL, Theta=NULL, Gamma=NULL, Xi=NULL
     ret_mean <- args_null("ret_mean", args, FALSE)
   }
   
+  ## interjecting the Bayesian PIM here ##
+  ## call total models
+  lambda.total <- bayesPIM_scaleModel(fitc) 
+  collapsed_samples <- supp_wTotals(fitc, lambda.total)
+  
   seed <- seed + sample(1:2^15, 1)
   ## uncollapse collapsed model ##
-  fitu <- uncollapsePibble(fitc$Samples, X, Theta, Gamma, Xi, upsilon, 
-                                     ret_mean=ret_mean, ncores=ncores, seed=seed)
+  if(isPIM){
+    trans_priors <- transformedPIM_priors(Theta, Xi)
+    fitu <- uncollapsePibble(collapsed_samples, X, trans_priors$Theta, Gamma, 
+                             trans_priors$Xi, upsilon, ret_mean = ret_mean, ncores = ncores, seed = seed)
+  } else{
+    fitu <- uncollapsePibble(fitc$Samples, X, Theta, Gamma, Xi.ALR, upsilon, 
+                             ret_mean=ret_mean, ncores=ncores, seed=seed)
+  }
   timeru <- parse_timer_seconds(fitu$Timer)
   
   timer <- c(timerc, timeru)
@@ -222,7 +235,11 @@ pibble <- function(Y=NULL, X=NULL, upsilon=NULL, Theta=NULL, Gamma=NULL, Xi=NULL
   out$upsilon <- upsilon
   out$Theta <- Theta
   out$X <- X
-  out$Xi <- Xi
+  if(isPIM){
+    out$Xi <- Xi
+  } else{
+    out$Xi <- Xi.ALR
+  }
   out$Gamma <- Gamma
   out$init <- init
   out$iter <- dim(fitc$Samples)[3]
