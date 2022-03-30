@@ -104,7 +104,7 @@ pibble <- function(Y=NULL, X=NULL, upsilon=NULL, Theta=NULL, Gamma=NULL, Xi=NULL
   check_dims(upsilon, 1, "upsilon")
   check_dims(Theta, c(D-1, Q), "Theta")
   check_dims(Gamma, c(Q, Q), "Gamma")
-  check_dims(Xi, c(D-1, D-1), "Xi")
+  
   
   # set number of iterations 
   n_samples <- args_null("n_samples", args, 2000)
@@ -161,6 +161,8 @@ pibble <- function(Y=NULL, X=NULL, upsilon=NULL, Theta=NULL, Gamma=NULL, Xi=NULL
       isPIM = FALSE
     }
   }
+  # check dimensions
+  check_dims(Xi.ALR, c(D-1, D-1), "Xi.ALR")
   ## precomputation ## 
   #KInv <- solve(Xi)
   #AInv <- solve(diag(N) + t(X) %*% Gamma %*% X)
