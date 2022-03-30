@@ -75,10 +75,14 @@ pibble <- function(Y=NULL, X=NULL, upsilon=NULL, Theta=NULL, Gamma=NULL, Xi=NULL
                     ...){
   args <- list(...)
   N <- try_set_dims(c(ncol(Y), ncol(X), args[["N"]]))
-  D <- try_set_dims(c(nrow(Y), nrow(Theta)+1, nrow(Xi), ncol(Xi), args[["D"]]))
+  D <- try_set_dims(c(nrow(Y), nrow(Theta)+1, args[["D"]]))
   Q <- try_set_dims(c(nrow(X), ncol(Theta), nrow(Gamma), ncol(Gamma), args[["Q"]]))
   if (any(c(N, D, Q) <=0)) stop("N, D, and Q must all be greater than 0 (D must be greater than 1)")
   if (D <= 1) stop("D must be greater than 1")
+  
+  if(!(((nrow(Xi) == ncol(Xi)) & (ncol(Xi) == D)) | ((nrow(Xi) == ncol(Xi)) & (ncol(Xi) == D)))){
+    stop("Xi is of incorrect dimension.")
+  }
   
   ## construct default values ##
   # for priors
@@ -146,8 +150,17 @@ pibble <- function(Y=NULL, X=NULL, upsilon=NULL, Theta=NULL, Gamma=NULL, Xi=NULL
   ncores <- args_null("ncores", args, -1)
   seed <- args_null("seed", args, sample(1:2^15, 1))
   
-  G <- cbind(diag(D-1), -1)
-  Xi.ALR = G%*%Xi%*%t(G)
+  if(ncol(Xi == D)){
+    G <- cbind(diag(D-1), -1)
+    Xi.ALR = G%*%Xi%*%t(G)
+  } else{
+    Xi.ALR <- Xi
+    if(isPIM){
+      message("Please supply a prior for Xi in terms of log abundances, not ALR coordinates.\n")
+      message("Switching to the non-Bayesian PIM for now...")
+      isPIM = FALSE
+    }
+  }
   ## precomputation ## 
   #KInv <- solve(Xi)
   #AInv <- solve(diag(N) + t(X) %*% Gamma %*% X)
