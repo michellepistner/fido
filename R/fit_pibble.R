@@ -110,13 +110,28 @@ pibble <- function(Y=NULL, X=NULL, upsilon=NULL, Theta=NULL, Gamma=NULL, Xi=NULL
   n_samples <- args_null("n_samples", args, 2000)
   use_names <- args_null("use_names", args, TRUE)
   
+  ## Converting Xi if needed
+  if(ncol(Xi == D)){
+    G <- cbind(diag(D-1), -1)
+    Xi.ALR = G%*%Xi%*%t(G)
+  } else{
+    Xi.ALR <- Xi
+    if(isPIM){
+      message("Please supply a prior for Xi in terms of log abundances, not ALR coordinates.\n")
+      message("Switching to the non-Bayesian PIM for now...")
+      isPIM = FALSE
+    }
+  }
+  # check dimensions
+  check_dims(Xi.ALR, c(D-1, D-1), "Xi.ALR")
+  
   # This is the signal to sample the prior only
   if (is.null(Y)){
     if (("Eta" %in% pars) & (is.null(X))) stop("X must be given if Eta is to be sampled")
     # create pibblefit object and pass to sample_prior then return
     out <- pibblefit(N=N, D=D, Q=Q, coord_system="alr", alr_base=D, 
                       upsilon=upsilon, Theta=Theta, 
-                      Gamma=Gamma, Xi=Xi, 
+                      Gamma=Gamma, Xi=Xi.ALR, 
                       # names_categories=rownames(Y), # these won't be present... 
                       # names_samples=colnames(Y), 
                       # names_covariates=colnames(X), 
@@ -150,19 +165,6 @@ pibble <- function(Y=NULL, X=NULL, upsilon=NULL, Theta=NULL, Gamma=NULL, Xi=NULL
   ncores <- args_null("ncores", args, -1)
   seed <- args_null("seed", args, sample(1:2^15, 1))
   
-  if(ncol(Xi == D)){
-    G <- cbind(diag(D-1), -1)
-    Xi.ALR = G%*%Xi%*%t(G)
-  } else{
-    Xi.ALR <- Xi
-    if(isPIM){
-      message("Please supply a prior for Xi in terms of log abundances, not ALR coordinates.\n")
-      message("Switching to the non-Bayesian PIM for now...")
-      isPIM = FALSE
-    }
-  }
-  # check dimensions
-  check_dims(Xi.ALR, c(D-1, D-1), "Xi.ALR")
   ## precomputation ## 
   #KInv <- solve(Xi)
   #AInv <- solve(diag(N) + t(X) %*% Gamma %*% X)
@@ -178,7 +180,7 @@ pibble <- function(Y=NULL, X=NULL, upsilon=NULL, Theta=NULL, Gamma=NULL, Xi=NULL
                                 jitter, multDirichletBoot, 
                                 useSylv, ncores, seed)
   timerc <- parse_timer_seconds(fitc$Timer)
-  
+  print("Made it this far")
 
   # if n_samples=0 or if hessian fails, then use MAP eta estimate for 
   # uncollapsing and unless otherwise specified against, use only the 
@@ -251,11 +253,8 @@ pibble <- function(Y=NULL, X=NULL, upsilon=NULL, Theta=NULL, Gamma=NULL, Xi=NULL
   out$upsilon <- upsilon
   out$Theta <- Theta
   out$X <- X
-  if(isPIM){
-    out$Xi <- Xi
-  } else{
-    out$Xi <- Xi.ALR
-  }
+  out$Xi <- Xi.ALR
+  out$Xi.logAbun <- Xi
   out$Gamma <- Gamma
   out$init <- init
   out$iter <- dim(fitc$Samples)[3]
