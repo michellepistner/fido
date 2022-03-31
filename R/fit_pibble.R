@@ -81,7 +81,7 @@ pibble <- function(Y=NULL, X=NULL, upsilon=NULL, Theta=NULL, Gamma=NULL, Xi=NULL
   if (D <= 1) stop("D must be greater than 1")
   
   if(!is.null(Xi)){
-    if(!(((nrow(Xi) == ncol(Xi)) & (ncol(Xi) == D)) | ((nrow(Xi) == ncol(Xi)) & (ncol(Xi) == D)))){
+    if(!(((nrow(Xi) == ncol(Xi)) & (ncol(Xi) != D)) | ((nrow(Xi) == ncol(Xi)) & (ncol(Xi) != D-1)))){
       stop("Xi is of incorrect dimension.")
     }
   }
@@ -113,7 +113,7 @@ pibble <- function(Y=NULL, X=NULL, upsilon=NULL, Theta=NULL, Gamma=NULL, Xi=NULL
   use_names <- args_null("use_names", args, TRUE)
   
   ## Converting Xi if needed
-  if(ncol(Xi == D)){
+  if(ncol(Xi) == D){
     G <- cbind(diag(D-1), -1)
     Xi.ALR = G%*%Xi%*%t(G)
   } else{
@@ -137,7 +137,7 @@ pibble <- function(Y=NULL, X=NULL, upsilon=NULL, Theta=NULL, Gamma=NULL, Xi=NULL
                       # names_categories=rownames(Y), # these won't be present... 
                       # names_samples=colnames(Y), 
                       # names_covariates=colnames(X), 
-                      X=X)
+                      X=X, isPIM = FALSE)
     out <- sample_prior(out, n_samples=n_samples, pars=pars, use_names=use_names)
     return(out)
   } else {

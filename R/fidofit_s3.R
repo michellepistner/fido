@@ -38,12 +38,12 @@ pibblefit <- function(D, N, Q, coord_system, iter=NULL,
                        Y=NULL, X=NULL, upsilon=NULL, 
                        Theta=NULL, Xi=NULL,Xi_default=NULL, Gamma=NULL, 
                        init=NULL, names_categories=NULL, names_samples=NULL, 
-                       names_covariates=NULL){
+                       names_covariates=NULL, isPIM = FALSE){
   m <- new_pibblefit(D, N, Q, coord_system, iter, alr_base, ilr_base,
                       Eta, Lambda, Sigma, Sigma_default, 
                       Y, X, upsilon, Theta, Xi,Xi_default, Gamma, 
                       init, names_categories, names_samples, 
-                      names_covariates)
+                      names_covariates, isPIM)
   verify(m)
   return(m)
 }
@@ -71,7 +71,7 @@ new_pibblefit <- function(D, N, Q, coord_system, iter=NULL,
       upsilon=upsilon, Theta=Theta, Xi=Xi, Xi_default=Xi_default, Gamma=Gamma, 
       # Other
       init=init, names_categories=names_categories, names_samples=names_samples, 
-      names_covariates=names_covariates
+      names_covariates=names_covariates, isPIM = isPIM
     ),
     class=c("pibblefit")
   )
@@ -232,7 +232,6 @@ verify.pibblefit <- function(m,...){
   ifnotnull(m$names_samples,check_dims(m$names_samples, c(N), "pibblefit param names_samples"))
   ifnotnull(m$names_covariates,check_dims(m$names_covariates, c(Q), "pibblefit param names_covariates"))
   
-  print(m$isPIM)
   if(m$isPIM){
     ifnotnull(m$Lambda,check_dims(m$Lambda, c(Dm1+1, Q, iter), "pibblefit param Lambda"))
     ifnotnull(m$Sigma,check_dims(m$Sigma, c(Dm1+1, Dm1+1, iter), "pibblefit param Sigma"))

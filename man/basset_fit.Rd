@@ -15,6 +15,7 @@ basset(
   Xi = NULL,
   init = NULL,
   pars = c("Eta", "Lambda", "Sigma"),
+  isPIM = FALSE,
   ...
 )
 

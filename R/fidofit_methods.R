@@ -878,7 +878,8 @@ sample_prior.pibblefit <- function(m, n_samples=2000L,
                     Gamma=m$Gamma, 
                     names_covariates=m$names_covariates, 
                     names_samples = m$names_samples, 
-                    names_categories = m$names_categories)
+                    names_categories = m$names_categories,
+                    isPIM = FALSE)
   
   # Convert back to original afterwards
   out <- reapply_coord(out, l)

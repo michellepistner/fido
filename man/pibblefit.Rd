@@ -26,7 +26,8 @@ pibblefit(
   init = NULL,
   names_categories = NULL,
   names_samples = NULL,
-  names_covariates = NULL
+  names_covariates = NULL,
+  isPIM = FALSE
 )
 }
 \arguments{
