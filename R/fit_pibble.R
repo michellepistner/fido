@@ -80,8 +80,10 @@ pibble <- function(Y=NULL, X=NULL, upsilon=NULL, Theta=NULL, Gamma=NULL, Xi=NULL
   if (any(c(N, D, Q) <=0)) stop("N, D, and Q must all be greater than 0 (D must be greater than 1)")
   if (D <= 1) stop("D must be greater than 1")
   
-  if(!(((nrow(Xi) == ncol(Xi)) & (ncol(Xi) == D)) | ((nrow(Xi) == ncol(Xi)) & (ncol(Xi) == D)))){
-    stop("Xi is of incorrect dimension.")
+  if(!is.null(Xi)){
+    if(!(((nrow(Xi) == ncol(Xi)) & (ncol(Xi) == D)) | ((nrow(Xi) == ncol(Xi)) & (ncol(Xi) == D)))){
+      stop("Xi is of incorrect dimension.")
+    }
   }
   
   ## construct default values ##
@@ -180,7 +182,6 @@ pibble <- function(Y=NULL, X=NULL, upsilon=NULL, Theta=NULL, Gamma=NULL, Xi=NULL
                                 jitter, multDirichletBoot, 
                                 useSylv, ncores, seed)
   timerc <- parse_timer_seconds(fitc$Timer)
-  print("Made it this far")
 
   # if n_samples=0 or if hessian fails, then use MAP eta estimate for 
   # uncollapsing and unless otherwise specified against, use only the 
@@ -204,13 +205,13 @@ pibble <- function(Y=NULL, X=NULL, upsilon=NULL, Theta=NULL, Gamma=NULL, Xi=NULL
   
   ## interjecting the Bayesian PIM here ##
   ## call total models
-  lambda.total <- bayesPIM_scaleModel(fitc) 
-  collapsed_samples <- supp_wTotals(fitc, lambda.total)
   
   seed <- seed + sample(1:2^15, 1)
   ## uncollapse collapsed model ##
   if(isPIM){
-    trans_priors <- transformedPIM_priors(Theta, Xi)
+    lambda.total <- bayesPIM_scaleModel(fitc, Theta, Xi, Gamma) 
+    collapsed_samples <- supp_wTotals(fitc, lambda.total, D)
+    trans_priors <- transformedPIM_priors(Theta, Xi, D)
     fitu <- uncollapsePibble(collapsed_samples, X, trans_priors$Theta, Gamma, 
                              trans_priors$Xi, upsilon, ret_mean = ret_mean, ncores = ncores, seed = seed)
   } else{
@@ -224,7 +225,6 @@ pibble <- function(Y=NULL, X=NULL, upsilon=NULL, Theta=NULL, Gamma=NULL, Xi=NULL
   timer <- c(timer, 
              "Overall" = unname(timerc["Overall"]) +  unname(timeru["Overall"]), 
              "Uncollapse_Overall" = timeru["Overall"])
-  
   
   # Marginal Likelihood Computation
   d <- D^2 + N*D + D*Q
@@ -267,6 +267,7 @@ pibble <- function(Y=NULL, X=NULL, upsilon=NULL, Theta=NULL, Gamma=NULL, Xi=NULL
   out$summary <- NULL
   out$Timer <- timer
   out$logMarginalLikelihood <- logMarginalLikelihood
+  out$isPIM <- isPIM
   attr(out, "class") <- c("pibblefit")
   # add names if present 
   if (use_names) out <- name(out)

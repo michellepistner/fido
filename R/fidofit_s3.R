@@ -219,8 +219,6 @@ verify.pibblefit <- function(m,...){
                                  is.null(m$Sigma), is.null(m$Sigma_default))
   ifnotnull(m$iter, stopifnot(is.integer(m$iter)))
   ifnotnull(m$Eta,check_dims(m$Eta, c(Dm1, N, iter), "pibblefit param Eta"))
-  ifnotnull(m$Lambda,check_dims(m$Lambda, c(Dm1, Q, iter), "pibblefit param Lambda"))
-  ifnotnull(m$Sigma,check_dims(m$Sigma, c(Dm1, Dm1, iter), "pibblefit param Sigma"))
   ifnotnull(m$Sigma_default,check_dims(m$Sigma_default, c(D-1, D-1, iter), "pibblefit param Sigma_default"))
   ifnotnull(m$Y,check_dims(m$Y, c(D, N), "pibblefit param Y"))
   ifnotnull(m$X,check_dims(m$X, c(Q, N), "pibblefit param X"))
@@ -233,6 +231,17 @@ verify.pibblefit <- function(m,...){
   ifnotnull(m$names_categories,check_dims(m$names_categories, c(D), "pibblefit param names_categories"))
   ifnotnull(m$names_samples,check_dims(m$names_samples, c(N), "pibblefit param names_samples"))
   ifnotnull(m$names_covariates,check_dims(m$names_covariates, c(Q), "pibblefit param names_covariates"))
+  
+  print(m$isPIM)
+  if(m$isPIM){
+    ifnotnull(m$Lambda,check_dims(m$Lambda, c(Dm1+1, Q, iter), "pibblefit param Lambda"))
+    ifnotnull(m$Sigma,check_dims(m$Sigma, c(Dm1+1, Dm1+1, iter), "pibblefit param Sigma"))
+    
+  } else{
+    ifnotnull(m$Lambda,check_dims(m$Lambda, c(Dm1, Q, iter), "pibblefit param Lambda"))
+    ifnotnull(m$Sigma,check_dims(m$Sigma, c(Dm1, Dm1, iter), "pibblefit param Sigma"))
+    
+  }
 }
 
 #' Simple verification of passed orthusfit object

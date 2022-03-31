@@ -17,6 +17,8 @@ GG <- function(obj, D){
   }
 }
 
+#' @importFrom LaplacesDemon rinvwishart
+#' @importFrom matrixNormal rmatnorm
 t.sampler <- function(nu.star, M.star, Xi.star, V.star){
   Sigma = rinvwishart(nu.star, Xi.star)
   C = t(chol(Sigma))
@@ -27,20 +29,20 @@ t.sampler <- function(nu.star, M.star, Xi.star, V.star){
 }
 
 
-bayesPIM_scaleModel <- function(fitc){
+bayesPIM_scaleModel <- function(fitc, Theta, Xi, Gamma){
   n_samples <- dim(fitc$Samples)[3]
   N <- dim(fitc$Samples)[2]
   D <- dim(fitc$Samples)[1] + 1 ##ALR coords so add 1
   tau = matrix(NA, nrow = N, ncol = n_samples)
   
-  lambda.par = alrInv_array(fitc$Samples, coords = 1)
+  lambda.par = alrInv_array(fitc$Samples, D, coords = 1)
   FF = cbind(diag(D-1), -1)
   lambda.par_tmp = array(NA, dim = c(dim(lambda.par)[1] - 1, dim(lambda.par)[2:3]))
   for(i in 1:n_samples){
     lambda.par_tmp[,,i] = FF %*% lambda.par[,,i]
   }
   
-  trans_priors <- transformedPIM_priors(Theta, Xi)
+  trans_priors <- transformedPIM_priors(Theta, Xi, D)
   Xi.t = trans_priors$Xi
   Theta.t = trans_priors$Theta
   
@@ -59,9 +61,9 @@ bayesPIM_scaleModel <- function(fitc){
   return(list(tau=tau))
 }
 
-supp_wTotals <- function(fitc, lambda.total){
+supp_wTotals <- function(fitc,lambda.total, D){
   n_samples <- dim(fitc$Samples)[3]
-  W.par <- alrInv_array(fitc$Samples, coords = 1)
+  W.par <- alrInv_array(fitc$Samples, D, coords = 1)
   lambda.par <- log(W.par)
   lambda <- array(NA, dim = dim(lambda.par)) #Always needed
   for(i in 1:n_samples){
@@ -71,7 +73,7 @@ supp_wTotals <- function(fitc, lambda.total){
   return(lambda)
 }
 
-transformedPIM_priors <- function(theta.old, Xi.old){
+transformedPIM_priors <- function(theta.old, Xi.old, D){
   
   theta.new <- alrInv_array(theta.old, D, 1)
   

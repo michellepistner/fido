@@ -36,8 +36,12 @@ NULL
 #' @rdname basset_fit
 #' @export
 basset <- function(Y=NULL, X, upsilon=NULL, Theta=NULL, Gamma=NULL, Xi=NULL, 
-                   init=NULL, pars=c("Eta", "Lambda", "Sigma"), ...){
+                   init=NULL, pars=c("Eta", "Lambda", "Sigma"), isPIM = FALSE, ...){
   
+  if(isPIM){
+    warning("PIM not implemented for basset model.")
+    isPIM <- FALSE
+  }
   if (!is.null(Theta)) {
     Theta_train <- Theta(X)
   } else {
