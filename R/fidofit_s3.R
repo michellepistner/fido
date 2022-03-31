@@ -55,7 +55,7 @@ new_pibblefit <- function(D, N, Q, coord_system, iter=NULL,
                            Y=NULL, X=NULL, upsilon=NULL, 
                            Theta=NULL, Xi=NULL,Xi_default=NULL, Gamma=NULL, 
                            init=NULL, names_categories=NULL, names_samples=NULL, 
-                           names_covariates=NULL){
+                           names_covariates=NULL, isPIM = FALSE){
 
   structure(
     list(

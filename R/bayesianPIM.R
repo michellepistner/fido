@@ -20,11 +20,12 @@ GG <- function(obj, D){
 #' @importFrom LaplacesDemon rinvwishart
 #' @importFrom matrixNormal rmatnorm
 t.sampler <- function(nu.star, M.star, Xi.star, V.star){
-  Sigma = rinvwishart(nu.star, Xi.star)
+  Sigma = rinvwishart(nu.star + 2*nrow(Xi.star), Xi.star)
   C = t(chol(Sigma))
-  X = rmatnorm(1,M.star,diag(nrow(M.star)), V.star)
-  Y= C %*% X
-  
+  mean = matrix(0, nrow = nrow(M.star), ncol = ncol(M.star))
+  X = rmatnorm(1,mean,diag(nrow(M.star)), V.star)
+  Y= C %*% X + M.star
+
   return(Y)
 }
 
