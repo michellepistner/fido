@@ -27,6 +27,7 @@
 #' @param names_categories character vector
 #' @param names_samples character vector
 #' @param names_covariates character vector
+#' @param isPIM Boolean. Was the partially identified model fit?
 #'
 #' @return object of class pibblefit
 #'

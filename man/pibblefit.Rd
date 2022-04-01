@@ -79,6 +79,8 @@ base D (used if coord_system=="proportions")}
 \item{names_samples}{character vector}
 
 \item{names_covariates}{character vector}
+
+\item{isPIM}{Boolean. Was the partially identified model fit?}
 }
 \value{
 object of class pibblefit

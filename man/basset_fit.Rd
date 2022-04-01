@@ -41,6 +41,8 @@ essentially iid on "base scale" using Aitchison terminology)}
 
 \item{pars}{character vector of posterior parameters to return}
 
+\item{isPIM}{Boolean. Is the Bayesian PIM fit?}
+
 \item{...}{other arguments passed to \link{pibble} (which is used internally to
 fit the basset model)}
 

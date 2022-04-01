@@ -15,6 +15,7 @@
 #' @param init (D-1) x Q initialization for Eta for optimization 
 #' @param pars character vector of posterior parameters to return
 #' @param m object of class bassetfit 
+#' @param isPIM Boolean. Is the Bayesian PIM fit?
 #' @param ... other arguments passed to \link{pibble} (which is used internally to 
 #'  fit the basset model)
 #' 

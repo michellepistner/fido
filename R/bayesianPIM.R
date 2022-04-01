@@ -30,7 +30,7 @@ t.sampler <- function(nu.star, M.star, Xi.star, V.star){
 }
 
 
-bayesPIM_scaleModel <- function(fitc, Theta, Xi, Gamma){
+bayesPIM_scaleModel <- function(fitc, X, Theta, Xi, Gamma, upsilon){
   n_samples <- dim(fitc$Samples)[3]
   N <- dim(fitc$Samples)[2]
   D <- dim(fitc$Samples)[1] + 1 ##ALR coords so add 1

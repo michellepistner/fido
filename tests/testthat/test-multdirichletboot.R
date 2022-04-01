@@ -32,6 +32,7 @@ test_that("MultDirichletBoot is correct", {
 })
 
 test_that("Timer does not have Error Johannes pointed out",{
+  set.seed(1)
   sim <- pibble_sim()
   fit <- pibble(sim$Y, sim$X, calcGradHess=FALSE, multDirichletBoot=0.65)
   expect_true(TRUE)

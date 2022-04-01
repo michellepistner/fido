@@ -209,7 +209,7 @@ pibble <- function(Y=NULL, X=NULL, upsilon=NULL, Theta=NULL, Gamma=NULL, Xi=NULL
   seed <- seed + sample(1:2^15, 1)
   ## uncollapse collapsed model ##
   if(isPIM){
-    lambda.total <- bayesPIM_scaleModel(fitc, Theta, Xi, Gamma) 
+    lambda.total <- bayesPIM_scaleModel(fitc, X, Theta, Xi, Gamma, upsilon) 
     collapsed_samples <- supp_wTotals(fitc, lambda.total, D)
     trans_priors <- transformedPIM_priors(Theta, Xi, D)
     fitu <- uncollapsePibble(collapsed_samples, X, trans_priors$Theta, Gamma, 
