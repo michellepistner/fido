@@ -270,7 +270,7 @@ pibble <- function(Y=NULL, X=NULL, upsilon=NULL, Theta=NULL, Gamma=NULL, Xi=NULL
   out$isPIM <- isPIM
   attr(out, "class") <- c("pibblefit")
   # add names if present 
-  if (use_names) out <- name(out)
+  if (use_names & !isPIM) out <- name(out)
   verify(out) # verify the pibblefit object
   return(out)
 }

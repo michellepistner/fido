@@ -14,7 +14,7 @@ test_that("t sampler gives correct mean and covariance",{
   Omega <- diag(m)
   t.star <- array(NA, c(dim(M), n_samples))
   for(i in 1:n_samples){
-    t.star[,,i] = t.sampler(5,M,Sigma,Omega)
+    t.star[,,i] = fido:::t.sampler(5,M,Sigma,Omega)
   }
   expect_true(sum(abs(apply(t.star,c(1,2),mean) - M )< 0.1) == (nrow(M)*ncol(M)))
   
@@ -29,3 +29,4 @@ test_that("t sampler gives correct mean and covariance",{
   expect_true(abs(var(zz) - ther.cov[1,1]) < .1)
   expect_true(abs(cov(zz,yy) - ther.cov[2,1]) < .1)
 })
+
