@@ -120,8 +120,7 @@ pibble <- function(Y=NULL, X=NULL, upsilon=NULL, Theta=NULL, Gamma=NULL, Xi=NULL
     Xi.ALR <- Xi
     if(isPIM){
       message("Please supply a prior for Xi in terms of log abundances, not ALR coordinates.\n")
-      message("Switching to the non-Bayesian PIM for now...")
-      isPIM = FALSE
+      stop("Or switch to the non-PIM model (isPIM = FALSE)...")
     }
   }
   # check dimensions
